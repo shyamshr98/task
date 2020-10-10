@@ -1,0 +1,99 @@
+
+package assignments;
+
+import static org.testng.Assert.assertEquals;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.Select;
+import org.testng.annotations.Test;
+
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterClass;
+
+public class Task1 {
+	private WebDriver driver;
+
+	@Test
+	public void taskTest1() {
+		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		driver.get("https://www.allmovie.com/");
+		driver.findElement(By.xpath("//a[text()='Advanced Search']")).click();
+
+		// selecting release year starting year
+		WebElement startYear = driver.findElement(By.xpath("//select[@name='start-year']"));
+		Select start = new Select(startYear);
+		start.selectByVisibleText("2017");
+
+		// selecting release year ending year
+		WebElement endYear = driver.findElement(By.xpath("//select[@name='end-year']"));
+		Select end = new Select(endYear);
+		end.selectByVisibleText("2018");
+
+		// checking for the selected filter
+		List<WebElement> activeFilters = driver.findElements(By.xpath("//section[@class='active-filters']/div[1]/a"));
+		assertEquals("2017", activeFilters.get(0).getText());
+		assertEquals("2018", activeFilters.get(1).getText());
+
+		// printing all movies titles
+		List<WebElement> allMoviesTitles = driver.findElements(By.xpath("//td[@class='title']"));
+		for (int i = 0; i < allMoviesTitles.size(); i++) {
+			System.out.println(allMoviesTitles.get(i).getText());
+		}
+
+		driver.navigate().back();
+		assertEquals(
+				"AllMovie | Movies and Films Database | Movie Search, Ratings, Photos, Recommendations, and Reviews",
+				driver.getTitle());
+
+	}
+
+	@Test
+	public void taskTest2() throws InterruptedException {
+		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		driver.get("https://www.nseindia.com/");
+		int gainers = 0;
+
+		gainers = driver.findElements(By.xpath("//div[@id='tab1_tableGainer']/table/tbody/tr")).size();
+		//System.out.println(gainers);
+		int minLtp = 100000000;
+		String minCompanyName = "default";
+
+		for (int i = 1; i <= gainers; i++) {
+			String companyName = driver
+					.findElement(By.xpath("//div[@id='tab1_tableGainer']/table/tbody/tr[" + i + "]/td[1]")).getText();
+			System.out.print(String.format("%-"+20+"s",companyName));
+			String lastTradingPrice = driver
+					.findElement(By.xpath("//div[@id='tab1_tableGainer']/table/tbody/tr[" + i + "]/td[2]")).getText();
+			System.out.println(" 	"+lastTradingPrice);
+			lastTradingPrice = lastTradingPrice.replaceAll(",", "");
+			int ltp = (int) Double.parseDouble(lastTradingPrice);
+
+			if (ltp < minLtp) {
+				minLtp = ltp;
+				minCompanyName = companyName;
+			}
+		}
+		System.out
+				.println("Company with minimum ltp is " + minCompanyName + " and its last trading price was " + minLtp);
+
+	}
+
+	@BeforeClass
+	public void beforeClass() {
+		System.setProperty("webdriver.chrome.driver", "C:\\Users\\HP\\Downloads\\seljars\\chromedriver.exe");
+		driver = new ChromeDriver();
+		driver.manage().window().maximize();
+	}
+
+	@AfterClass
+	public void afterClass() throws InterruptedException {
+		driver.quit();
+	}
+
+}
